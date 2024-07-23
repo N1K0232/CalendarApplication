@@ -14,4 +14,9 @@
     <PackageReference Include="TinyHelpers" Version="3.1.10" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\CalendarApplication.DataAccessLayer\CalendarApplication.DataAccessLayer.csproj" />
+    <ProjectReference Include="..\CalendarApplication.Shared\CalendarApplication.Shared.csproj" />
+  </ItemGroup>
+
 </Project>
