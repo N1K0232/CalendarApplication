@@ -4,14 +4,17 @@ using CalendarApplication.Authentication;
 using CalendarApplication.Authentication.Entities;
 using CalendarApplication.Authentication.Handlers;
 using CalendarApplication.Authentication.Requirements;
+using CalendarApplication.BusinessLayer.Mapping;
 using CalendarApplication.BusinessLayer.Services;
-using CalendarApplication.BusinessLayer.Services.Interfaces;
 using CalendarApplication.BusinessLayer.Settings;
 using CalendarApplication.BusinessLayer.StartupServices;
+using CalendarApplication.BusinessLayer.Validations;
 using CalendarApplication.DataAccessLayer;
 using CalendarApplication.DataAccessLayer.Caching;
 using CalendarApplication.Extensions;
 using CalendarApplication.Swagger;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -50,6 +53,14 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault;
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+builder.Services.AddAutoMapper(typeof(TodoMapperProfile).Assembly);
+builder.Services.AddValidatorsFromAssemblyContaining<SaveTodoRequestValidator>();
+
+builder.Services.AddFluentValidationAutoValidation(options =>
+{
+    options.DisableDataAnnotationsValidation = true;
 });
 
 if (swaggerSettings.Enabled)
@@ -163,10 +174,11 @@ builder.Services.AddAuthorization(options =>
     });
 });
 
-builder.Services.AddScoped<IIdentityService, IdentityService>();
-builder.Services.AddScoped<IMeService, MeService>();
-
 builder.Services.AddHostedService<IdentityStartupService>();
+builder.Services.Scan(scan => scan.FromAssemblyOf<IdentityService>()
+    .AddClasses(classes => classes.InExactNamespaceOf<IdentityService>())
+    .AsImplementedInterfaces()
+    .WithScopedLifetime());
 
 var app = builder.Build();
 app.Environment.ApplicationName = appSettings.ApplicationName;
