@@ -8,6 +8,8 @@ using CalendarApplication.BusinessLayer.Services;
 using CalendarApplication.BusinessLayer.Services.Interfaces;
 using CalendarApplication.BusinessLayer.Settings;
 using CalendarApplication.BusinessLayer.StartupServices;
+using CalendarApplication.DataAccessLayer;
+using CalendarApplication.DataAccessLayer.Caching;
 using CalendarApplication.Extensions;
 using CalendarApplication.Swagger;
 using MicroElements.Swashbuckle.FluentValidation.AspNetCore;
@@ -90,7 +92,11 @@ if (swaggerSettings.Enabled)
 }
 
 var connectionString = builder.Configuration.GetConnectionString("SqlConnection");
+builder.Services.AddSqlServer<ApplicationDbContext>(connectionString);
 builder.Services.AddSqlServer<AuthenticationDbContext>(connectionString);
+
+builder.Services.AddScoped<IApplicationDbContext>(services => services.GetRequiredService<ApplicationDbContext>());
+builder.Services.AddSingleton<IDataContextCache, DataContextCache>();
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
