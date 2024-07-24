@@ -396,3 +396,5 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+/src/CalendarApplication/appsettings.local.json
+/src/CalendarApplication/appsettings.local.json
